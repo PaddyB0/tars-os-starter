@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -72,6 +73,39 @@ const STARTER_RECORD_PATHS = new Set([
   "Tasks/Northstar Industries - Build forecast model.md",
   "Tasks/Northstar Industries - Confirm data access.md",
   "Work Sessions/Northstar Industries - WS 2026-08-17 1000.md",
+]);
+
+const STARTER_RECORD_SHA256 = new Map([
+  ["CRM/Clients/Northstar Industries.md", "da3b5151fa9dc79e1228da1e628d1ce3593c07e45762c7621c7df652d1211e08"],
+  ["CRM/Contacts/Alex Morgan.md", "384ae08e301e35d01aec02d043ac18decd0d88266a032e489f04ea48cd844755"],
+  ["Habits/Weekly portfolio review.md", "9ae3270b842e77a90ab29760c9ce6a0aa9f15865e714625072e48f66501f0ded"],
+  ["Meetings/Northstar Industries - Kick-off (2026-08-17).md", "6834d6d9131bfb943edb3f39b47199c4780ab8461d62db96e1cee10cd57da2c1"],
+  ["Milestones/Northstar Industries - PS Q3 2026 - MS - Forecast ready.md", "8ab4a7c12965d0cc030f8dc5bdac96ecdca5360402492e44319003366f8f457a"],
+  ["Projects/Northstar Industries - PS Q3 2026.md", "e9aa7ad90d9b3c8a3dbdec5870f65c21eb8ee1cc469086aca42152230e975ecc"],
+  ["Scheduling Policies/Standard workweek.md", "2178a921b544dd99387f6840c1ff83118c77439f81c224d1f3d67607deae3058"],
+  ["Tasks/Northstar Industries - Build forecast model.md", "67d70a7fa0a2c8b670062d42939b01b599e2e288951936f57e88327324880518"],
+  ["Tasks/Northstar Industries - Confirm data access.md", "206609d185d1e342ee3f48beaaf662251792b3e7af25aba7196c6064c094470a"],
+  ["Work Sessions/Northstar Industries - WS 2026-08-17 1000.md", "65d1654d9d75920cc032231143291490a76b7e74e82ddfbecc587dc1327fd3a0"],
+]);
+
+const LOCAL_OPERATING_PREFIXES = [
+  "CRM/Clients/",
+  "CRM/Contacts/",
+  "Habits/",
+  "Handoffs/",
+  "Meetings/",
+  "Milestones/",
+  "Notes/",
+  "Projects/",
+  "Scheduling Policies/",
+  "Tasks/",
+  "Work Sessions/",
+];
+
+const ALLOWED_DISTRIBUTION_OPERATING_PATHS = new Set([
+  ...STARTER_RECORD_PATHS,
+  "Handoffs/.gitkeep",
+  "Notes/.gitkeep",
 ]);
 
 const DATE_FIELDS = new Set([
@@ -189,6 +223,19 @@ async function listFiles(root) {
   return out;
 }
 
+async function listDistributionFiles(root) {
+  try {
+    const tracked = execFileSync("git", ["ls-files", "-z"], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return tracked.split("\0").filter(Boolean).map((path) => join(root, path));
+  } catch {
+    return listFiles(root);
+  }
+}
+
 function frontmatterOf(content) {
   const normalized = content.replaceAll("\r\n", "\n");
   if (!normalized.startsWith("---\n")) return null;
@@ -257,21 +304,36 @@ async function check() {
     }
   }
 
+  for (const [path, expected] of STARTER_RECORD_SHA256) {
+    try {
+      const content = await readFile(join(VAULT_ROOT, path));
+      if (sha256(content) !== expected) issues.push(`starter fixture digest mismatch: ${path}`);
+    } catch {
+      issues.push(`missing starter fixture: ${path}`);
+    }
+  }
+
   let files = [];
   try {
-    files = await listFiles(VAULT_ROOT);
+    files = await listDistributionFiles(VAULT_ROOT);
   } catch {
     issues.push("starter-vault is missing");
   }
 
   for (const file of files) {
     const name = basename(file);
+    const path = relative(VAULT_ROOT, file);
+    if (
+      LOCAL_OPERATING_PREFIXES.some((prefix) => path.startsWith(prefix))
+      && !ALLOWED_DISTRIBUTION_OPERATING_PATHS.has(path)
+    ) {
+      issues.push(`unexpected local operating file in distribution: ${path}`);
+    }
     if (FORBIDDEN_BASENAMES.has(name) || name === ".env" || name.startsWith(".env.")) {
       issues.push(`forbidden local state: ${relative(VAULT_ROOT, file)}`);
     }
     if (extname(file) === ".log") issues.push(`forbidden log file: ${relative(VAULT_ROOT, file)}`);
 
-    const path = relative(VAULT_ROOT, file);
     if (path.startsWith(".git/") || path.startsWith("node_modules/")) continue;
     try {
       const content = await readFile(file, "utf8");
@@ -378,7 +440,7 @@ async function check() {
     process.exitCode = 1;
     return;
   }
-  console.log(`STARTER CHECK PASSED ${files.length} files`);
+  console.log(`STARTER CHECK PASSED ${files.length} distribution files`);
 }
 
 const command = process.argv[2] ?? "check";
