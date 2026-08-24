@@ -1,0 +1,16 @@
+{
+  "name": "tars-os-colleague-starter",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Privacy-clean internal Obsidian starter vault with the bundled TARS OS interface.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.mjs",
+    "build": "npm run check"
+  }
+}

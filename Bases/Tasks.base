@@ -1,0 +1,176 @@
+filters:
+  and:
+    - file.inFolder("Tasks")
+formulas:
+  work_hours: (file.backlinks.map(value.asFile()).filter(value.inFolder("Work Sessions") && !value.hasTag("duplicate/meeting-source")).map(value.properties["DurationMin"]).filter(value).reduce(acc + value, 0) / 60).round(2)
+properties:
+  file.name:
+    displayName: task name
+  formula.work_hours:
+    displayName: Work hours
+views:
+  - type: table
+    name: tasks.db
+    filters:
+      and:
+        - Status.contains("⚪ TO DO")
+    groupBy:
+      property: Status
+      direction: ASC
+    order:
+      - file.name
+      - Status
+      - Priority
+      - SyncToReclaim
+      - Estimate
+      - formula.work_hours
+      - StartDate
+      - DueDate
+      - Phase
+      - Project
+      - Parent
+      - BlockedBy
+      - Visibility
+      - sessions
+      - Company
+      - Contact
+      - Assignee
+      - executor
+      - Description
+      - Completed_At
+      - tags
+      - ReclaimTaskID
+    sort:
+      - property: DueDate
+        direction: ASC
+      - property: file.name
+        direction: ASC
+      - property: StartDate
+        direction: DESC
+      - property: Completed_At
+        direction: DESC
+      - property: Status
+        direction: DESC
+      - property: Priority
+        direction: DESC
+    summaries: {}
+    columnSize:
+      file.name: 444
+      note.Status: 109
+      note.Priority: 128
+      note.Estimate: 91
+      note.DueDate: 179
+      note.Project: 217
+      note.Company: 127
+      note.Contact: 146
+      note.Completed_At: 213
+  - type: table
+    name: by project
+    groupBy:
+      property: Project
+      direction: ASC
+    order:
+      - file.name
+      - Status
+      - Priority
+      - formula.work_hours
+      - DueDate
+      - Phase
+      - Visibility
+      - Completed_At
+    sort:
+      - property: Priority
+        direction: DESC
+      - property: file.name
+        direction: ASC
+    columnSize:
+      file.name: 336
+      note.Status: 109
+      note.Priority: 128
+      note.DueDate: 179
+      note.Completed_At: 213
+  - type: cards
+    name: board
+    groupBy:
+      property: Status
+      direction: ASC
+    order:
+      - file.name
+      - Priority
+      - Project
+      - DueDate
+      - formula.work_hours
+    sort:
+      - property: Priority
+        direction: DESC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: overdue
+    filters:
+      and:
+        - note.DueDate < now()
+        - note.Status != "🟢 COMPLETE"
+    order:
+      - file.name
+      - Status
+      - Priority
+      - DueDate
+      - Project
+      - formula.work_hours
+    sort:
+      - property: DueDate
+        direction: ASC
+  - type: table
+    name: due this week
+    filters:
+      and:
+        - note.DueDate >= now()
+        - note.DueDate <= today() + "7d"
+        - note.Status != "🟢 COMPLETE"
+    order:
+      - file.name
+      - Status
+      - Priority
+      - DueDate
+      - Project
+      - formula.work_hours
+    sort:
+      - property: DueDate
+        direction: ASC
+  - type: table
+    name: active
+    filters:
+      and:
+        - note.Status == "🔵 IN PROGRESS"
+    order:
+      - file.name
+      - Priority
+      - DueDate
+      - Project
+      - formula.work_hours
+    sort:
+      - property: Priority
+        direction: DESC
+  - type: table
+    name: routed queue
+    filters:
+      and:
+        - note.Executor
+        - note.Status != "🟢 COMPLETE"
+    groupBy:
+      property: Executor
+      direction: ASC
+    order:
+      - file.name
+      - Status
+      - Priority
+      - Executor
+      - DueDate
+      - Project
+      - formula.work_hours
+    sort:
+      - property: Priority
+        direction: DESC
+      - property: DueDate
+        direction: ASC

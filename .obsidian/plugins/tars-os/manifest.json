@@ -1,0 +1,10 @@
+{
+  "id": "tars-os",
+  "name": "TARS OS",
+  "version": "0.2.0",
+  "minAppVersion": "1.11.4",
+  "description": "TARS OS — the operating console for a TARS PM vault. Native Obsidian views over the vault's fileClass schema: Today, Projects, Meetings & Sessions, plus a detail sidebar and status readout, with Reclaim sync, Gantt, recurrence, and saved views.",
+  "author": "Patrick Bowyer",
+  "authorUrl": "https://github.com/PaddyB0/tars-os",
+  "isDesktopOnly": true
+}

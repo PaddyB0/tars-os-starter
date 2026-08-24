@@ -1,0 +1,23 @@
+filters:
+  and:
+    - file.inFolder("Handoffs")
+properties:
+  file.name:
+    displayName: handoff
+  note.sha:
+    displayName: SHA
+views:
+  - type: table
+    name: handoffs
+    order:
+      - file.name
+      - date
+      - executor
+      - summary
+      - next
+      - sha
+    sort:
+      - property: date
+        direction: DESC
+      - property: file.name
+        direction: DESC

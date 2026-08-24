@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Reject TARS OS starter pushes that did not pass scripts/safe_push.py."""
+
+from __future__ import annotations
+
+import os
+import re
+import sys
+
+
+EXPECTED_REMOTE_URLS = {
+    "git@github.com:paddyb0/tars-os-starter.git",
+    "https://github.com/paddyb0/tars-os-starter.git",
+    "ssh://git@github.com:paddyb0/tars-os-starter.git",
+}
+ZERO_SHA = "0" * 40
+
+
+def block(message: str) -> int:
+    print(f"TARS OS STARTER PRE-PUSH BLOCKED: {message}", file=sys.stderr)
+    print("Use: python3 scripts/safe_push.py --push", file=sys.stderr)
+    return 2
+
+
+def main() -> int:
+    if len(sys.argv) != 3:
+        return block("unexpected Git hook arguments")
+
+    remote_name, remote_url = sys.argv[1:]
+    normalized_url = remote_url.strip().rstrip("/").casefold()
+    if remote_name != "origin" or normalized_url not in EXPECTED_REMOTE_URLS:
+        return block("only the verified TARS OS starter origin is allowed")
+
+    approved_sha = os.environ.get("TARS_OS_SAFE_PUSH_REVIEWED_SHA", "")
+    approved_branch = os.environ.get("TARS_OS_SAFE_PUSH_BRANCH", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", approved_sha):
+        return block("missing reviewed-SHA authorization")
+    if not approved_branch or approved_branch.startswith("-"):
+        return block("missing branch authorization")
+
+    updates = [line.split() for line in sys.stdin.read().splitlines() if line.strip()]
+    if len(updates) != 1 or len(updates[0]) != 4:
+        return block("exactly one branch update is required")
+
+    _local_ref, local_sha, remote_ref, _remote_sha = updates[0]
+    if local_sha == ZERO_SHA:
+        return block("branch deletion is forbidden")
+    if local_sha != approved_sha:
+        return block("Git attempted to push a commit other than the reviewed SHA")
+    if remote_ref != f"refs/heads/{approved_branch}":
+        return block("Git attempted to update an unauthorized remote ref")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

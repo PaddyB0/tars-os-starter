@@ -1,0 +1,177 @@
+filters:
+  or:
+    - file.inFolder("Meetings")
+    - file.inFolder("Work Sessions")
+formulas:
+  record_kind: if(file.inFolder("Meetings"), "Meeting source", "Work Session ledger")
+  activity_start: StartTime
+  activity_end: EndTime
+  task_link: Task
+  project_link: Project
+  activity_type: if(file.inFolder("Meetings"), "Meeting", ActivityType)
+  audience: if(file.inFolder("Meetings"), if(CallType == "external call", "External", if(CallType == "internal call", "Internal", "")), Audience)
+  reporting_bucket: ReportingBucket
+  duration_min: if(file.inFolder("Meetings"), if(StartTime && EndTime, (date(EndTime) - date(StartTime)).minutes, ""), DurationMin)
+  raw_hours: if(file.inFolder("Work Sessions") && DurationMin, DurationMin / 60, "")
+  rounded_billable_hours: if(file.inFolder("Work Sessions") && HoursType == "Billable" && DurationMin, (DurationMin / 30).ceil() / 2, "")
+  source_start_delta_min: if(file.inFolder("Work Sessions") && Meeting && ActivityType == "Meeting" && StartTime && Meeting.asFile().properties["StartTime"], (date(StartTime) - date(Meeting.asFile().properties["StartTime"])).minutes, "")
+  source_end_delta_min: if(file.inFolder("Work Sessions") && Meeting && ActivityType == "Meeting" && EndTime && Meeting.asFile().properties["EndTime"], (date(EndTime) - date(Meeting.asFile().properties["EndTime"])).minutes, "")
+  exception: if(file.inFolder("Work Sessions") && file.tags.contains("duplicate/meeting-source"), "Imported Meeting duplicate — delete", if(file.inFolder("Meetings") && !StartTime, "Missing meeting StartTime", if(file.inFolder("Meetings") && StartTime && date(StartTime) >= date("2026-06-01") && !EndTime, "Missing post-cutoff EndTime", if(!ReportingBucket, "Unclassifiable ReportingBucket", if(file.inFolder("Work Sessions") && !(Task || Meeting), "Missing Task / Meeting", if(file.inFolder("Work Sessions") && !StartTime, "Missing session StartTime", if(file.inFolder("Work Sessions") && !EndTime, "Missing session EndTime", if(file.inFolder("Work Sessions") && !DurationMin, "Missing DurationMin", if(file.inFolder("Work Sessions") && DurationMin && StartTime && EndTime && DurationMin != (date(EndTime) - date(StartTime)).minutes, "DurationMin mismatch", if(file.inFolder("Work Sessions") && Meeting && ActivityType == "Meeting" && ((StartTime && Meeting.asFile().properties["StartTime"] && date(StartTime) != date(Meeting.asFile().properties["StartTime"])) || (EndTime && Meeting.asFile().properties["EndTime"] && date(EndTime) != date(Meeting.asFile().properties["EndTime"]))), "Meeting/session timestamp mismatch", if(file.inFolder("Work Sessions") && !HoursType, "Missing HoursType", if(file.inFolder("Work Sessions") && !ActivityType, "Unresolved ActivityType", if(file.inFolder("Work Sessions") && !Audience, "Unresolved Audience", "")))))))))))))
+properties:
+  file.name:
+    displayName: Activity
+  formula.record_kind:
+    displayName: Record
+  formula.activity_start:
+    displayName: StartTime
+  formula.activity_end:
+    displayName: EndTime
+  formula.task_link:
+    displayName: Task
+  formula.project_link:
+    displayName: Project
+  formula.activity_type:
+    displayName: ActivityType
+  formula.audience:
+    displayName: Audience
+  formula.reporting_bucket:
+    displayName: ReportingBucket
+  formula.duration_min:
+    displayName: DurationMin
+  formula.raw_hours:
+    displayName: Raw hours
+  formula.rounded_billable_hours:
+    displayName: Rounded billable hours
+  formula.source_start_delta_min:
+    displayName: Source start delta (min)
+  formula.source_end_delta_min:
+    displayName: Source end delta (min)
+  formula.exception:
+    displayName: Exception
+views:
+  - type: table
+    name: Activities
+    order:
+      - file.name
+      - formula.record_kind
+      - formula.activity_start
+      - formula.activity_end
+      - Company
+      - formula.project_link
+      - formula.task_link
+      - Meeting
+      - formula.activity_type
+      - formula.audience
+      - formula.reporting_bucket
+      - formula.duration_min
+      - formula.source_start_delta_min
+      - formula.source_end_delta_min
+      - HoursType
+      - formula.exception
+    sort:
+      - property: formula.activity_start
+        direction: DESC
+    columnSize:
+      note.Meeting: 177
+  - type: table
+    name: Work Session Ledger
+    filters:
+      and:
+        - file.inFolder("Work Sessions")
+    order:
+      - file.name
+      - formula.activity_start
+      - formula.activity_end
+      - formula.task_link
+      - Meeting
+      - formula.project_link
+      - Company
+      - formula.activity_type
+      - formula.audience
+      - formula.reporting_bucket
+      - HoursType
+      - formula.duration_min
+      - formula.raw_hours
+      - formula.rounded_billable_hours
+      - formula.exception
+    sort:
+      - property: formula.activity_start
+        direction: DESC
+    summaries:
+      formula.raw_hours: Sum
+      formula.rounded_billable_hours: Sum
+  - type: table
+    name: Meeting Sources
+    filters:
+      and:
+        - file.inFolder("Meetings")
+    order:
+      - file.name
+      - StartTime
+      - EndTime
+      - formula.duration_min
+      - Project
+      - formula.reporting_bucket
+      - Company
+      - Contacts
+      - CallType
+      - GongId
+      - CallUrl
+      - formula.exception
+    sort:
+      - property: StartTime
+        direction: DESC
+  - type: table
+    name: Exceptions
+    filters:
+      and:
+        - formula.exception != ""
+    order:
+      - file.name
+      - formula.record_kind
+      - formula.exception
+      - formula.activity_start
+      - formula.activity_end
+      - formula.task_link
+      - Meeting
+      - formula.project_link
+      - Company
+      - formula.activity_type
+      - formula.audience
+      - formula.reporting_bucket
+      - HoursType
+      - formula.duration_min
+      - formula.source_start_delta_min
+      - formula.source_end_delta_min
+    sort:
+      - property: formula.exception
+        direction: ASC
+      - property: formula.activity_start
+        direction: DESC
+  - type: table
+    name: Duration Reporting — 2026-06-01+
+    filters:
+      and:
+        - file.inFolder("Work Sessions")
+        - formula.activity_start >= date("2026-06-01")
+        - formula.exception == ""
+    groupBy:
+      property: formula.reporting_bucket
+      direction: ASC
+    order:
+      - file.name
+      - formula.activity_start
+      - Company
+      - formula.project_link
+      - formula.activity_type
+      - formula.audience
+      - HoursType
+      - formula.duration_min
+      - formula.raw_hours
+      - formula.rounded_billable_hours
+    sort:
+      - property: formula.activity_start
+        direction: DESC
+    summaries:
+      formula.raw_hours: Sum
+      formula.rounded_billable_hours: Sum

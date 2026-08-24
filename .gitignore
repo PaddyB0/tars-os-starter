@@ -1,0 +1,12 @@
+.DS_Store
+.trash/
+.obsidian/workspace*.json
+.obsidian/plugins/tars-os/data.json
+.env
+.env.*
+*.log
+node_modules/
+coverage/
+*.swp
+__pycache__/
+*.py[cod]

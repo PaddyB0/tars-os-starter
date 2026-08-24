@@ -1,0 +1,60 @@
+model:
+  version: 1
+  kind: Table
+  columns: []
+pluginVersion: 1.0.0
+filters:
+  and:
+    - file.inFolder("CRM")
+views:
+  - type: table
+    name: crm.db
+    groupBy:
+      property: file.tags
+      direction: ASC
+    order:
+      - file.name
+      - tags
+      - Type
+      - BillingAddress
+      - Timezone
+      - Industry
+      - SubIndustry
+      - sf.Url
+      - contact.recordtype
+      - contact.email
+    sort:
+      - property: Type
+        direction: DESC
+    columnSize:
+      file.name: 251
+      note.tags: 159
+      note.Type: 113
+      note.BillingAddress: 193
+  - type: table
+    name: Contacts
+    filters:
+      and:
+        - file.tags.contains("crm_contact")
+    groupBy:
+      property: Company
+      direction: ASC
+    order:
+      - file.name
+      - contact.email
+      - contact.recordtype
+      - contact.title
+      - timezone
+    columnSize: {}
+  - type: cards
+    name: Companies
+    filters:
+      and:
+        - file.tags.contains("crm_company")
+    order:
+      - file.name
+      - Industry
+      - Project
+      - SubIndustry
+      - Timezone
+    cardSize: 300
