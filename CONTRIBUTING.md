@@ -4,7 +4,7 @@ This is a private internal distribution repository.
 
 1. Create a `codex/` or other feature branch from `main`.
 2. Make the smallest schema-valid change.
-3. Keep records fictional and do not add local Obsidian state.
+3. Keep committed example records fictional. Real Datarails records may exist locally but must remain ignored and untracked.
 4. Run `npm test` and `npm run check`.
 5. Commit the reviewed payload.
 6. Run `python3 scripts/safe_push.py`, then publish through the same script.

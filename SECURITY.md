@@ -4,6 +4,8 @@
 
 This repository is approved only for authorized internal colleague use. It is not an open-source or public release.
 
+Real client and contact records are valid local operating data, but they are outside the shared repository boundary. The operational folders ignore newly created Markdown records by default. Never override those rules with `git add --force` for live data.
+
 ## Local credentials
 
 TARS OS stores integration configuration in local Obsidian plugin state. That file is ignored and forbidden from Git:

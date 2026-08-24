@@ -10,3 +10,17 @@ coverage/
 *.swp
 __pycache__/
 *.py[cod]
+
+# Live operating records belong to each colleague's local vault. The fictional
+# starter records are already tracked; these rules protect newly created notes.
+/CRM/Clients/*
+/CRM/Contacts/*
+/Habits/*
+/Handoffs/*
+/Meetings/*
+/Milestones/*
+/Notes/*
+/Projects/*
+/Scheduling Policies/*
+/Tasks/*
+/Work Sessions/*

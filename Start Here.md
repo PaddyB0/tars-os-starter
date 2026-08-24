@@ -30,8 +30,11 @@ Google Calendar, Gmail/Gong, and Reclaim remain disabled. Configure them only in
 TARS OS settings using separate local credentials. Never commit
 `.obsidian/plugins/tars-os/data.json`.
 
-## Remove the fictional records
+## Start working with real engagements
 
-After checking the UI, delete notes containing `Northstar Industries` from CRM,
-Projects, Milestones, Tasks, Meetings, and Work Sessions. Keep the folder
-structure, `Administrator/`, `Bases/`, and `.obsidian/plugins/tars-os/`.
+Keep the Northstar Industries notes as read-only examples; do not repurpose them
+with real client data. Create or import the real Datarails engagements you are
+authorized to work with as new notes. New operational Markdown records in these
+folders are local-only and ignored by Git by default, so TARS OS can operate on
+real work without placing client data in the shared starter repository. Do not
+force-add those records.

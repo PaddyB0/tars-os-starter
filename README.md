@@ -2,7 +2,7 @@
 
 A private, directly openable Obsidian vault that demonstrates the TARS operating structure and bundles the TARS OS interface.
 
-The repository contains fictional Northstar Industries records only. It does not contain a live vault, client records, credentials, calendar caches, Gong receipts, or machine workspace state.
+The committed repository contains fictional Northstar Industries examples only. A colleague's local vault is expected to contain their real Datarails engagements, while Git keeps those operating records out of this shared distribution.
 
 ## Quick start
 
@@ -44,11 +44,14 @@ npm install
 npm run check
 ```
 
-The check fails closed when required structure is missing, mapped folders contain unexpected records, schema values drift, wikilinks break, or local state and high-confidence secret patterns enter the payload.
+The check validates the Git-tracked distribution payload. It fails closed when required structure is missing, tracked mapped folders contain unexpected records, schema values drift, wikilinks break, or local state and high-confidence secret patterns enter the payload. Ignored local operating records do not fail distribution validation.
 
-## Privacy boundary
+## Local operation and privacy boundary
 
-- Use fictional records only.
+- The shared Git payload uses fictional example records only.
+- Real Datarails records are supported and expected in local day-to-day use. Newly created operational notes are ignored by Git by default.
+- Keep the tracked Northstar examples unchanged rather than repurposing them with live data; their digests are pinned by validation.
+- Do not force-add or commit real client, contact, meeting, task, or work-session records to this distribution repository. Use a separately approved, access-controlled data repository if operational records must be shared or backed up.
 - Never commit `data.json`, `.env*`, workspace state, logs, credentials, calendar caches, Gong receipts, or real CRM/client content.
 - External integrations are disabled until each colleague configures credentials locally.
 - Share this repository only with authorized internal colleagues.
