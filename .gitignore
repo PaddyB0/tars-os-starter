@@ -24,3 +24,17 @@ __pycache__/
 /Scheduling Policies/*
 /Tasks/*
 /Work Sessions/*
+
+# Approved fictional fixtures remain part of the distribution payload.
+!/CRM/Clients/Northstar Industries.md
+!/CRM/Contacts/Alex Morgan.md
+!/Habits/Weekly portfolio review.md
+!/Handoffs/.gitkeep
+!/Meetings/Northstar Industries - Kick-off (2026-08-17).md
+!/Milestones/Northstar Industries - PS Q3 2026 - MS - Forecast ready.md
+!/Notes/.gitkeep
+!/Projects/Northstar Industries - PS Q3 2026.md
+!/Scheduling Policies/Standard workweek.md
+!/Tasks/Northstar Industries - Build forecast model.md
+!/Tasks/Northstar Industries - Confirm data access.md
+!/Work Sessions/Northstar Industries - WS 2026-08-17 1000.md

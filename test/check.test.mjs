@@ -18,6 +18,15 @@ test("the package remains private and unlicensed for public redistribution", () 
   assert.equal(packageJson.license, "UNLICENSED");
 });
 
+test("approved distribution fixtures are tracked without being ignored", () => {
+  const result = spawnSync("git", ["ls-files", "-ci", "--exclude-standard", "-z"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout, "");
+});
+
 test("local operational records may contain live data without entering the distribution payload", () => {
   const repository = new URL("..", import.meta.url);
   const relativePath = "Tasks/Local Client - Private operating task.md";
