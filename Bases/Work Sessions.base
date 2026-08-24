@@ -1,0 +1,69 @@
+filters:
+  and:
+    - file.folder == "Work Sessions"
+properties:
+  file.name:
+    displayName: session name
+views:
+  - type: table
+    name: Table
+    order:
+      - Task
+      - Meeting
+      - Project
+      - Company
+      - ReportingBucket
+      - HoursType
+      - ActivityType
+      - Audience
+      - StartTime
+      - EndTime
+      - DurationMin
+      - tags
+      - ReclaimEventID
+      - file.name
+    sort:
+      - property: StartTime
+        direction: DESC
+      - property: EndTime
+        direction: ASC
+    columnSize:
+      note.DurationMin: 117
+  - type: table
+    name: By Task
+    filters:
+      and:
+        - file.hasLink(this.file)
+    order:
+      - file.name
+      - StartTime
+      - Meeting
+      - ReportingBucket
+      - HoursType
+      - ActivityType
+      - Audience
+      - DurationMin
+    sort:
+      - property: StartTime
+        direction: DESC
+  - type: table
+    name: By Client
+    groupBy:
+      property: Company
+      direction: ASC
+    order:
+      - Task
+      - Meeting
+      - Project
+      - ReportingBucket
+      - ActivityType
+      - Audience
+      - StartTime
+      - EndTime
+      - DurationMin
+    sort:
+      - property: file.name
+        direction: ASC
+    columnSize:
+      note.Project: 207
+      note.DurationMin: 78

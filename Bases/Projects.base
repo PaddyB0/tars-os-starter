@@ -1,0 +1,66 @@
+filters:
+  and:
+    - file.inFolder("Projects")
+formulas:
+  progress: if(file.backlinks.map(value.asFile()).filter(value.path.contains("Tasks/")).length > 0, (file.backlinks.map(value.asFile()).filter(value.path.contains("Tasks/")).filter(value.properties["Status"] == "🟢 COMPLETE").length / file.backlinks.map(value.asFile()).filter(value.path.contains("Tasks/")).length * 100).round(0) + "%", "—")
+  Tasks: file.backlinks.map(value.asFile()).filter(value.path.contains("Tasks/"))
+  Task count: file.backlinks.map(value.asFile()).filter(value.path.contains("Tasks/")).length
+properties:
+  file.name:
+    displayName: project name
+  formula.Tasks:
+    displayName: tasks
+  formula.Task count:
+    displayName: "# tasks"
+views:
+  - type: table
+    name: projects.db
+    groupBy:
+      property: Status
+      direction: ASC
+    order:
+      - file.name
+      - Status
+      - Type
+      - formula.Task count
+      - scope_hrs
+      - ScopeCategory
+      - Company
+      - Contacts
+      - sf.ProjectName
+      - sf.NotetoSETeam
+      - StartTime
+      - EndTime
+      - tags
+      - formula.progress
+    sort:
+      - property: StartTime
+        direction: ASC
+      - property: formula.Tasks
+        direction: ASC
+      - property: Type
+        direction: DESC
+      - property: EndTime
+        direction: DESC
+      - property: Company
+        direction: DESC
+    columnSize:
+      file.name: 384
+      note.scope_hrs: 89
+      note.Company: 169
+      note.Contacts: 159
+  - type: cards
+    name: board
+    groupBy:
+      property: Status
+      direction: ASC
+    order:
+      - file.name
+      - formula.Task count
+      - Company
+      - EndTime
+    sort:
+      - property: EndTime
+        direction: DESC
+  - type: table
+    name: View

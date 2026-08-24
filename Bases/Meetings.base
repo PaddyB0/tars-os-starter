@@ -1,0 +1,37 @@
+filters:
+  and:
+    - file.inFolder("Meetings")
+formulas:
+  call duration (min): if(EndTime, (date(EndTime) - date(StartTime)).minutes, "")
+properties:
+  file.name:
+    displayName: meeting name
+  formula.call duration (min):
+    displayName: duration (min)
+views:
+  - type: table
+    name: meetings.db
+    order:
+      - file.name
+      - CallUrl
+      - StartTime
+      - EndTime
+      - formula.call duration (min)
+      - Project
+      - ReportingBucket
+      - Company
+      - Contacts
+      - tags
+      - CallType
+      - Passcode
+    sort:
+      - property: StartTime
+        direction: DESC
+      - property: call url
+        direction: ASC
+      - property: CallType
+        direction: DESC
+      - property: file.name
+        direction: ASC
+    columnSize:
+      note.CallUrl: 131
