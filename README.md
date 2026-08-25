@@ -1,4 +1,4 @@
-# TARS OS Colleague Starter
+# TARS OS Starter
 
 A private, directly openable Obsidian vault that demonstrates the TARS operating structure and bundles the TARS OS interface.
 
